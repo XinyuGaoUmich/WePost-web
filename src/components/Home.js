@@ -2,6 +2,7 @@ import React from 'react';
 import {API_ROOT, GEO_OPTIONS, TOKEN_KEY, AUTH_PREFIX} from "../constants";
 import { Tabs, Button, Spin } from 'antd';
 import { POS_KEY } from "../constants";
+import { Gallery } from "./Gallery"
 import $ from 'jquery';
 
 const TabPane = Tabs.TabPane;
@@ -12,13 +13,15 @@ export class Home extends React.Component {
         loadingGeoLocation: false,
         loadingPost: false,
         error: '',
+        posts: []
     }
+
     componentDidMount() {
         this.getGeoLocation();
     }
 
     getGeoLocation = () => {
-        this.setState({ loadingGeoLocation: true, error: ''})
+        this.setState({ loadingGeoLocation: true, error: '' })
         if ("geolocation" in navigator) {
             navigator.geolocation.getCurrentPosition(
                 this.onSuccessLoadGeoLocation, this.onFailedLoadGeoLocation, GEO_OPTIONS
@@ -31,7 +34,7 @@ export class Home extends React.Component {
     }
 
     onSuccessLoadGeoLocation = (position) => {
-        this.setState({ loadingGeoLocation: false, error: ''})
+        this.setState({ loadingGeoLocation: false, error: '' })
         console.log(position);
         const { latitude, longitude } = position.coords;
         localStorage.setItem(POS_KEY, JSON.stringify({lat: latitude, lon: longitude }));
@@ -39,12 +42,12 @@ export class Home extends React.Component {
     }
 
     onFailedLoadGeoLocation = (error) => {
-        this.setState({ loadingGeoLocation: false, error: 'Failed to load geo location!'})
+        this.setState({ loadingGeoLocation: false, error: 'Failed to load geo location!' })
         console.log(error);
     }
 
     loadNearByPosts = () => {
-        this.setState({loadingPost: true, error: ''})
+        this.setState({ loadingPost: true, error: '' })
         const {lat, lon} = JSON.parse(localStorage.getItem(POS_KEY));
         $.ajax({
             url:`${API_ROOT}/search?lat=${lat}&lon=${lon}&range=20000`,
@@ -54,10 +57,10 @@ export class Home extends React.Component {
             }
         }).then((response) => {
             console.log(response);
-            this.setState({loadingPost: false, error: ''});
+            this.setState({ posts: response, loadingPost: false, error: ''});
         }, (response) => {
             console.log(response.responseText)
-            this.setState({loadingPost: false, error: 'Failed to load posts!'})
+            this.setState({ loadingPost: false, error: 'Failed to load posts!' })
         }).catch((error) =>{
             console.log(error);
         });
@@ -70,6 +73,19 @@ export class Home extends React.Component {
             return <Spin tip="Loading geo location..."/>
         } else if (this.state.loadingPost) {
             return <Spin tip="Loading posts..."/>
+        } else if (this.state.posts && this.state.posts.length > 0) {
+            const images = this.state.posts.map((post) => {
+                return {
+                    user: post.user,
+                    src: post.url,
+                    thumbnail: post.url,
+                    caption: post.messages,
+                    thumbnailWidth: 400,
+                    thumbnailHeight: 300
+
+                };
+            });
+            return <Gallery images={images}/>
         } else {
             return '';
         }
