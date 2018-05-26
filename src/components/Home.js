@@ -1,9 +1,10 @@
 import React from 'react';
 import {API_ROOT, GEO_OPTIONS, TOKEN_KEY, AUTH_PREFIX} from "../constants";
-import { Tabs, Button, Spin } from 'antd';
+import { Tabs, Spin } from 'antd';
 import { POS_KEY } from "../constants";
 import { Gallery } from "./Gallery"
 import $ from 'jquery';
+import { CreatePostButton } from "./CreatePostButton";
 
 const TabPane = Tabs.TabPane;
 
@@ -92,7 +93,7 @@ export class Home extends React.Component {
     }
 
     render() {
-        const operations = <Button type="primary">Create New Post</Button>;
+        const operations = <CreatePostButton />;
 
         return (
             <div className="main-tabs">
